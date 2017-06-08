@@ -1,7 +1,7 @@
-# coding=utf-8
+# coding:utf-8
 
 __author__ = 'yangyz'
-##水平有限，多多指教，哈哈
+# 水平有限，多多指教，哈哈
 
 import re
 from bs4 import BeautifulSoup
@@ -9,11 +9,11 @@ import requests
 import time
 
 
-##获取前30页步行街的发帖主题url
+# 获取前30页步行街的发帖主题url
 def get_hupuTitle_message():
     titleList = []
     baseUrl = "https://bbs.hupu.com/bxj-postdate-"
-    for i in range(30):
+    for i in range(1):
         url = baseUrl + str(i + 1)
         respon = requests.get(url)
         respon.encoding = "utf-8"
@@ -32,17 +32,18 @@ def get_hupuTitle_message():
                 if '2017' in soup_author.getText():
                     author = soup_author.getText().split("2017-")[0]
                     date = "2017-" + soup_author.getText().split("2017-")[1]
-                if (len(titleUrl) > 12):  ##去掉影视区之类的
+                if (len(titleUrl) > 12):  # 去掉影视区之类的
                     pass
                 else:
                     if titleUrl in titleList:
                         pass
                     else:
-                        titleList.append(titleUrl)  ##+"@"+title+"@"+author+"@"+date
+                        # +"@"+title+"@"+author+"@"+date
+                        titleList.append(titleUrl)
     return titleList
 
 
-##找出每个发帖主题里面的回帖用户，返回一个list，list中存一个发帖主题下的所有回帖jr的个人信息链接
+# 找出每个发帖主题里面的回帖用户，返回一个list，list中存一个发帖主题下的所有回帖jr的个人信息链接
 def getHupuUsers(pageid):
     urlList = []
     url = "https://bbs.hupu.com/" + pageid + "html"
@@ -52,10 +53,12 @@ def getHupuUsers(pageid):
     soup_pageCount = soup.find(attrs={'class': 'page clearfix'})
     pageCount = 1
     try:
-        pageCount = re.search('html\"\>(\d*)\<\/a\> \<input', str(soup_pageCount)).group(1)  ##找出一共有多少页回帖
+        pageCount = re.search(
+            'html\"\>(\d*)\<\/a\> \<input',
+            str(soup_pageCount)).group(1)  # 找出一共有多少页回帖
     except Exception as err:
         pass
-    for c in range(int(pageCount)):  ##可能有很多页，也可能只有一页
+    for c in range(int(pageCount)):  # 可能有很多页，也可能只有一页
         index = "-" + str(c) + "."
         url = "https://bbs.hupu.com/" + pageid.replace(".", index) + "html"
         resp = requests.get(url)
@@ -76,7 +79,7 @@ def getHupuUsers(pageid):
     return urlList
 
 
-##根据url获取回帖jr的信息
+# 根据url获取回帖jr的信息
 def getUserDetail(userUrl):
     resp = requests.get(userUrl)
     resp.encoding = "utf-8"
@@ -88,7 +91,7 @@ def getUserDetail(userUrl):
     address = ""  # 地址 ##选填信息
     NBATeam = ""  # NBA主队 ##选填信息
     CBATeam = ""  # CBA主队 ##选填信息
-    ## 下面这些为必须信息  每个用户都有
+    # 下面这些为必须信息  每个用户都有
     BBSRank = ""  # 论坛等级
     calorie = ""  # 卡路里
     onlineTime = ""  # 在线时间
@@ -96,29 +99,39 @@ def getUserDetail(userUrl):
     lastTimeLogin = ""  # 上次登录时间
     ###################################进入正则表达式匹配阶段##############
     userName = re.search('name\"\>(.*)\<\/div\>', str(soup_name)).group(1)
-    ##性别
+    # 性别
     try:
-        gender = re.search('gender\"\>(.*)\<\/span\>(.*)f666', str(soup_userInfo)).group(1)
+        gender = re.search(
+            'gender\"\>(.*)\<\/span\>(.*)f666',
+            str(soup_userInfo)).group(1)
     except Exception as err:
         pass
     # 地址
     try:
-        address = re.search('address\"\>(.*)\<\/span\>', str(soup_userInfo)).group(1)
+        address = re.search(
+            'address\"\>(.*)\<\/span\>',
+            str(soup_userInfo)).group(1)
     except Exception as err:
         pass
     # NBA主队
     try:
-        NBATeam = re.search('NBA主队(.*)_blank\"\>(.*)\<\/a\>(.*)f666', str(soup_userInfo)).group(2)
+        NBATeam = re.search(
+            'NBA主队(.*)_blank\"\>(.*)\<\/a\>(.*)f666',
+            str(soup_userInfo)).group(2)
     except Exception as err:
         pass
     # CBA主队
     try:
-        CBATeam = re.search('CBA主队(.*)_blank\"\>(.*)\<\/a\>\<\/span\>', str(soup_userInfo)).group(2)
+        CBATeam = re.search(
+            'CBA主队(.*)_blank\"\>(.*)\<\/a\>\<\/span\>',
+            str(soup_userInfo)).group(2)
     except Exception as err:
         pass
     # 论坛等级
     try:
-        BBSRank = re.search('论坛等级：\<\/span\>(.*)\<br\/\>', str(soup_userInfo)).group(1)
+        BBSRank = re.search(
+            '论坛等级：\<\/span\>(.*)\<br\/\>',
+            str(soup_userInfo)).group(1)
     except Exception as err:
         pass
     # 卡路里
@@ -128,20 +141,27 @@ def getUserDetail(userUrl):
         pass
     # 在线时间
     try:
-        onlineTime = re.search('在线时间：</span>(.*)小时', str(soup_userInfo)).group(1)
+        onlineTime = re.search(
+            '在线时间：</span>(.*)小时',
+            str(soup_userInfo)).group(1)
     except Exception as err:
         pass
     # 加入时间
     try:
-        joinDate = re.search('加入时间：</span>(.*)\\n', str(soup_userInfo)).group(1)
+        joinDate = re.search(
+            '加入时间：</span>(.*)\\n',
+            str(soup_userInfo)).group(1)
     except Exception as err:
         pass
     # 上次登录时间
     try:
-        lastTimeLogin = re.search('上次登录：</span>(.*)\\n', str(soup_userInfo)).group(1)
+        lastTimeLogin = re.search(
+            '上次登录：</span>(.*)\\n',
+            str(soup_userInfo)).group(1)
     except Exception as err:
         pass
-    totalStr = userName.strip() + "@" + gender.strip() + "@" + address.strip() + "@" + NBATeam.strip() + "@" + CBATeam.strip() + "@" + BBSRank.strip() + "@" + calorie.strip() + "@" + onlineTime.strip() + "@" + joinDate.strip() + "@" + lastTimeLogin.strip()
+    totalStr = userName.strip() + "@" + gender.strip() + "@" + address.strip() + "@" + NBATeam.strip() + "@" + CBATeam.strip() + \
+        "@" + BBSRank.strip() + "@" + calorie.strip() + "@" + onlineTime.strip() + "@" + joinDate.strip() + "@" + lastTimeLogin.strip()
     return totalStr
 
 
@@ -149,6 +169,7 @@ if __name__ == '__main__':
     titleList = get_hupuTitle_message()
     print("获取页面主题链接结束,共" + str(len(titleList)) + "条")
     x = 0
+    file_hp = open('hupujrs_infor.txt','w+')
     for i in range(len(titleList)):
         try:
             urlList = getHupuUsers(str(titleList[i]))
@@ -156,16 +177,15 @@ if __name__ == '__main__':
                 try:
                     totalStr = getUserDetail(str(urlList[i]))
                     totalList = totalStr.split("@")
-                    ##如果想插入到数据库，这里已经写好sql
+                    # 如果想插入到数据库，这里已经写好sql
                     insertSql = """INSERT INTO hupuUsers(userName,gender,address,nbaTeam,cbaTeam,bbsRank,calorie,onlineTime,joinDate,lastTimeLogin)values(""" + "'" + \
                                 totalList[0] + "'," + "'" + totalList[1] + "'," + "'" + totalList[2] + "','" + \
                                 totalList[3] + "','" + totalList[4] + "'," + totalList[5] + "," + totalList[6] + "," + \
                                 totalList[7] + ",'" + totalList[8] + "','" + totalList[9] + "'" + """)"""
                     print(insertSql)
-                except:
+                    file_hp.write(insertSql + '\n')
+                except BaseException:
                     print("用户信息解析失败")
             time.sleep(1)
-        except:
-                print("打开" + str(titleList[i]) + "失败")
-
-
+        except BaseException:
+            print("打开" + str(titleList[i]) + "失败")
